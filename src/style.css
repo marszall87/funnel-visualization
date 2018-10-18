@@ -1,0 +1,194 @@
+.wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.svg {
+    width: 100%;
+    height: 100%;
+    font-family: Roboto;
+}
+
+.bucket {
+    rect {
+        fill: url(#gradient);
+    }
+    text {
+        fill: white;
+        stroke-linecap: butt;
+        stroke-linejoin: miter;
+        paint-order: stroke;
+        stroke-width: 5px;
+    }
+    text.value {
+        font-size: 22px;
+    }
+
+    &.bucket-evaluator {
+        rect {
+            fill: #6554c0;
+        }
+        text {
+            stroke: #6554c0;
+        }
+    }
+
+    &.bucket-installed {
+        rect {
+            fill: #00b8d9;
+        }
+        text {
+            stroke: #00b8d9;
+        }
+    }
+
+    &.bucket-silent {
+        rect {
+            fill: #aaa;
+        }
+        text {
+            stroke: #aaa;
+        }
+    }
+
+    &.bucket-active {
+        rect {
+            fill: #0052cc;
+        }
+        text {
+            stroke: #0052cc;
+        }
+    }
+
+    &.bucket-dormant {
+        rect {
+            fill: #aaa;
+        }
+        text {
+            stroke: #aaa;
+        }
+    }
+
+    &.bucket-converted {
+        rect {
+            fill: #36b37e;
+        }
+        text {
+            stroke: #36b37e;
+        }
+    }
+}
+
+.flow {
+    opacity: 0.5;
+}
+
+.drop {
+    path {
+        stroke: #ff5630;
+        opacity: 0.5;
+    }
+    .solid {
+        fill: #ff5630;
+        opacity: 0.5;
+    }
+    text {
+        font-size: 12px;
+    }
+}
+
+.step {
+    line {
+        stroke: white;
+        stroke-width: 3px;
+    }
+    text {
+        fill: black;
+        text-transform: uppercase;
+        font-size: 14px;
+    }
+}
+
+.gradient-drop {
+    .gradient-start {
+        stop-color: #ff5630;
+        stop-opacity: 0.5;
+    }
+    .gradient-stop {
+        stop-color: #ff5630;
+        stop-opacity: 0;
+    }
+}
+
+.palette {
+    background: #ff5630;
+    background: #ffab00;
+    background: #36b37e;
+    background: #00b8d9;
+    background: #6554c0;
+    background: #172b4d;
+    background: #0052cc;
+}
+
+.gradient-evaluator-installed {
+    .gradient-start {
+        stop-color: #6554c0;
+    }
+    .gradient-stop {
+        stop-color: #00b8d9;
+    }
+}
+
+.gradient-evaluator-silent {
+    .gradient-start {
+        stop-color: #6554c0;
+    }
+    .gradient-stop {
+        stop-color: #aaa;
+    }
+}
+
+.gradient-installed-active {
+    .gradient-start {
+        stop-color: #00b8d9;
+    }
+    .gradient-stop {
+        stop-color: #0052cc;
+    }
+}
+
+.gradient-installed-dormant {
+    .gradient-start {
+        stop-color: #00b8d9;
+    }
+    .gradient-stop {
+        stop-color: #aaa;
+    }
+}
+
+.gradient-active-converted {
+    .gradient-start {
+        stop-color: #0052cc;
+    }
+    .gradient-stop {
+        stop-color: #36b37e;
+    }
+}
+
+.gradient-dormant-converted {
+    .gradient-start {
+        stop-color: #aaa;
+    }
+    .gradient-stop {
+        stop-color: #36b37e;
+    }
+}
+
+.gradient-silent-converted {
+    .gradient-start {
+        stop-color: #aaa;
+    }
+    .gradient-stop {
+        stop-color: #36b37e;
+    }
+}
