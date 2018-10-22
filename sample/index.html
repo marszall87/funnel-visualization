@@ -29,7 +29,129 @@
     <script src="../dist/funnel.umd.js" type="text/javascript"></script>
 
     <script>
-        Funnel({ container: document.getElementById('container') });
+
+        const funnel = [
+            {
+                title: 'Acquisition',
+                buckets: [
+                    {
+                        id: 'evaluator',
+                        title: 'Evaluator',
+                        value: 100,
+                        color: '#6554c0',
+                        drop: {
+                            title: 'Never installed',
+                            value: 20
+                        }
+                    }
+                ]
+            },
+            {
+                title: 'Activation',
+                buckets: [
+                    {
+                        id: 'installed',
+                        title: 'Installed',
+                        value: 70,
+                        color: '#00b8d9',
+                        flows: [
+                            {
+                                source: 'evaluator',
+                                value: 70
+                            }
+                        ],
+                        drop: {
+                            title: 'Never used',
+                            value: 10
+                        }
+                    },
+                    // {
+                    //     id: 'silent',
+                    //     title: 'Silent',
+                    //     value: 10,
+                    //     color: '#C1C7D0',
+                    //     flows: [
+                    //         {
+                    //             source: 'evaluator',
+                    //             value: 10
+                    //         }
+                    //     ]
+                    // }
+                ]
+            },
+            {
+                title: 'Retention',
+                buckets: [
+                    {
+                        id: 'active',
+                        title: 'Active',
+                        value: 20,
+                        color: '#0052cc',
+                        flows: [
+                            {
+                                source: 'installed',
+                                value: 20
+                            }
+                        ],
+                        drop: {
+                            title: 'Eval ended',
+                            value: 10
+                        },
+                        clients: [
+                            {
+                                name: 'Some company',
+                                link: 'https://www.google.pl'
+                            }
+                        ]
+                    },
+                    {
+                        id: 'dormant',
+                        title: 'Dormant',
+                        value: 40,
+                        color: '#C1C7D0',
+                        flows: [
+                            {
+                                source: 'installed',
+                                value: 40
+                            }
+                        ],
+                        drop: {
+                            title: 'Eval ended',
+                            value: 35
+                        }
+                    }
+                ]
+            },
+            {
+                title: 'Revenue',
+                buckets: [
+                    {
+                        title: 'Converted',
+                        value: 8,
+                        id: 'converted',
+                        color: '#36b37e',
+                        flows: [
+                            {
+                                source: 'active',
+                                value: 5
+                            },
+                            {
+                                source: 'dormant',
+                                value: 2
+                            },
+                            // {
+                            //     source: 'silent',
+                            //     value: 1
+                            // }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+
+        Funnel({ funnel, container: document.getElementById('container') });
+
     </script>
 </body>
 

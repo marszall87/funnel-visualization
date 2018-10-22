@@ -10,5 +10,5 @@ module.exports = {
             }
         ]
     ],
-    plugins: ['babel-plugin-fast-async']
+    plugins: ['babel-plugin-fast-async', ['@babel/plugin-transform-react-jsx', { pragma: 'h' }]]
 };

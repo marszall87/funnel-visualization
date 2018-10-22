@@ -1,25 +1,95 @@
-import html from 'hyperhtml/esm';
+import { h, render, Component } from 'preact';
+import Portal from 'preact-portal';
 import style from './style.css';
+import Popper from 'popper.js';
 
-const bucket = (props, opts) => {
-    const { id, color } = props;
-    const { bucketWidth, borderRadius } = opts;
-    return html(props, 'svg')`
-        <g class=${style.bucket} transform=${`translate(${props.x} ${props.y})`}>
-            <rect x=0 y=${-borderRadius} width=${bucketWidth} height=${props.height +
-        2 * borderRadius} fill=${color} rx=${borderRadius} ry=${borderRadius}/>
-            <g transform=${`translate(${bucketWidth / 2} ${props.height / 2})`}>
-                <text alignment-baseline="baseline" text-anchor="middle" x=0 y=-3 stroke=${color}>${props.title}</text>
-                <text class=${style.value} alignment-baseline="hanging" text-anchor="middle" stroke=${color} x=0 y=3>${
-        props.value
-    }</text>
+class Popup extends Component {
+    positionPopup(el) {
+        if (!el) return;
+        var anotherPopper = new Popper(this.props.triggerRef, el, {
+            placement: 'right-start'
+        });
+    }
+
+    render({ open, into = 'body', children }) {
+        return open ? (
+            <Portal into={into}>
+                <div class={style.popup} ref={el => this.positionPopup(el)} visible={this.state.visible}>
+                    {children}
+                </div>
+            </Portal>
+        ) : null;
+    }
+}
+
+class Bucket extends Component {
+    constructor() {
+        super();
+        this.state = {
+            showPopup: false
+        };
+        this.bucketElement = undefined;
+    }
+
+    togglePopup() {
+        this.setState(state => ({ showPopup: !state.showPopup }));
+    }
+
+    componentDidMount() {
+        this.bucketElement;
+    }
+
+    render({ bucket, opts }) {
+        const { id, color, x, y, title, value, height, clients } = bucket;
+        const { bucketWidth, borderRadius } = opts;
+        return (
+            <g
+                ref={el => (this.bucketElement = el)}
+                class={style.bucket}
+                transform={`translate(${x} ${y})`}
+                onClick={() => this.togglePopup()}
+            >
+                <rect
+                    x={0}
+                    y={-borderRadius}
+                    width={bucketWidth}
+                    height={height + 2 * borderRadius}
+                    fill={color}
+                    rx={borderRadius}
+                    ry={borderRadius}
+                />
+                <g transform={`translate(${bucketWidth / 2} ${height / 2})`}>
+                    <text alignment-baseline="baseline" text-anchor="middle" x={0} y={-3} stroke={color}>
+                        {title}
+                    </text>
+                    <text
+                        class={style.value}
+                        alignment-baseline="hanging"
+                        text-anchor="middle"
+                        stroke={color}
+                        x={0}
+                        y={3}
+                    >
+                        {value}
+                    </text>
+                </g>
+                {clients && clients.length > 0 ? (
+                    <Popup open={this.state.showPopup} triggerRef={this.bucketElement}>
+                        <h4>{title} clients</h4>
+                        {clients.map(client => (
+                            <p>
+                                <a href={client.link}>{client.name}</a>
+                            </p>
+                        ))}
+                    </Popup>
+                ) : null}
             </g>
-        </g> 
-    `;
-};
+        );
+    }
+}
 
-const flow = (props, opts) => {
-    const { from, to, height, fromOffset, toOffset, id, percent } = props;
+const Flow = ({ flow, opts }) => {
+    const { from, to, height, fromOffset, toOffset, id, percent } = flow;
     const { bucketWidth, height: graphHeight } = opts;
 
     const x1 = from.x + bucketWidth;
@@ -40,20 +110,30 @@ const flow = (props, opts) => {
 
     if (straight) {
         // draw a rectangle, because gradients don't work on straight lines o_O
-        return html(props, 'svg')`
-            <g class=${style.flow} transform="${`translate(${x1} ${y1 - height / 2})`}">
-                <rect x=0 y=0 width=${width} height=${height} fill=${gradientUrl}/>
-                <rect x=0 y=0 width=${width} height=${height} fill="url(#flow-pattern)"/>
-                <rect x="${width / 2 - fontSize - labelRadius}" y="${height / 2 -
-            fontSize / 2 -
-            labelRadius}" width="${fontSize * 2 + labelRadius * 2}" height="${fontSize +
-            labelRadius * 2}" rx="${labelRadius}" ry="${labelRadius}" fill="${gradientUrl}" />
-                <text x=${width / 2} y=${height / 2 +
-            1} alignment-baseline="middle" text-anchor="middle" font-size="${`${fontSize}px`}">
-                    ${Math.floor(percent * 100)}%
+        return (
+            <g class={style.flow} transform={`translate(${x1} ${y1 - height / 2})`}>
+                <rect x={0} y={0} width={width} height={height} fill={gradientUrl} />
+                <rect x={0} y={0} width={width} height={height} fill="url(#flow-pattern)" />
+                <rect
+                    x={width / 2 - fontSize - labelRadius}
+                    y={height / 2 - fontSize / 2 - labelRadius}
+                    width={fontSize * 2 + labelRadius * 2}
+                    height={fontSize + labelRadius * 2}
+                    rx={labelRadius}
+                    ry={labelRadius}
+                    fill={gradientUrl}
+                />
+                <text
+                    x={width / 2}
+                    y={height / 2 + 1}
+                    alignment-baseline="middle"
+                    text-anchor="middle"
+                    font-size={`${fontSize}px`}
+                >
+                    {Math.floor(percent * 100)}%
                 </text>
             </g>
-        `;
+        );
     } else {
         const path = [
             `M ${0} ${y1}`,
@@ -63,25 +143,36 @@ const flow = (props, opts) => {
 
         const textY = extension ? y1 : Math.min(y1, y2) + Math.abs(y1 - y2) / 2;
 
-        return html(props, 'svg')`
-            <g class=${style.flow} transform="${`translate(${x1} 0)`}">
-                <path d="${path}" fill="none" stroke="${gradientUrl}" stroke-width=${height}/>
-                <path d="${path}" fill="none" stroke="url(#flow-pattern)" stroke-width=${height}/>
-                <rect x="${width / 2 - fontSize - labelRadius}" y="${textY -
-            fontSize / 2 -
-            labelRadius}" width="${fontSize * 2 + labelRadius * 2}" height="${fontSize +
-            labelRadius * 2}" rx="${labelRadius}" ry="${labelRadius}" fill="${gradientUrl}" />
-                <text x=${width / 2} y=${textY +
-            1} alignment-baseline="middle" text-anchor="middle" font-size="${`${fontSize}px`}">
-                    ${Math.floor(percent * 100)}%
+        return (
+            <g class={style.flow} transform={`translate(${x1} 0)`}>
+                <path d={path} fill="none" stroke={gradientUrl} stroke-width={height} />
+                <path d={path} fill="none" stroke="url(#flow-pattern)" stroke-width={height} />
+                <rect
+                    x={width / 2 - fontSize - labelRadius}
+                    y={textY - fontSize / 2 - labelRadius}
+                    width={fontSize * 2 + labelRadius * 2}
+                    height={fontSize + labelRadius * 2}
+                    rx={labelRadius}
+                    ry={labelRadius}
+                    fill={gradientUrl}
+                />
+                <text
+                    x={width / 2}
+                    y={1}
+                    transform={`translate(0 ${textY})`}
+                    alignment-baseline="middle"
+                    text-anchor="middle"
+                    font-size={`${fontSize}px`}
+                >
+                    {Math.floor(percent * 100)}%
                 </text>
             </g>
-        `;
+        );
     }
 };
 
-const drop = (props, opts) => {
-    const { from, height, title, percent } = props;
+const Drop = ({ drop, opts }) => {
+    const { from, height, title, percent } = drop;
     const { bucketWidth } = opts;
 
     const radius = 15;
@@ -92,29 +183,43 @@ const drop = (props, opts) => {
 
     const path = [`M 0 0`, `Q ${radius} 0, ${radius} ${radius}`].join(' ');
 
-    return html(props, 'svg')`
-        <g transform=${`translate(${x} ${y})`} class=${style.drop}>
-            <path fill="none" d="${path}" stroke-width=${radius * 2}/>
-            <rect class=${style.solid} x=0 y=${radius} width=${radius * 2} height=${height - radius} />
-            <rect x=0 y=${height} width=${radius * 2} height=${padding} fill="url(#funnel-gradient-drop)" />
-            <rect x=0 y=${-radius} width=${radius * 2} height="${height +
-        padding +
-        radius}" fill="url(#drop-pattern)" />
-            <text x=3 y=${radius} transform="">${Math.floor(percent * 100)}%</text>
+    return (
+        <g transform={`translate(${x} ${y})`} class={style.drop}>
+            <path fill="none" d={path} stroke-width={radius * 2} />
+            <rect class={style.solid} x={0} y={radius} width={radius * 2} height={height - radius} />
+            <rect x={0} y={height} width={radius * 2} height={padding} fill="url(#funnel-gradient-drop)" />
+            <rect x={0} y={-radius} width={radius * 2} height={height + padding + radius} fill="url(#drop-pattern)" />
+            <text x={3} y={radius}>
+                {Math.floor(percent * 100)}%
+            </text>
         </g>
-    `;
+    );
 };
 
-const step = (props, opts) => {
-    const { x, title } = props;
+const Step = ({ step, opts }) => {
+    const { x, title } = step;
     const { height, bucketWidth, headerHeight, borderRadius } = opts;
-    return html(props, 'svg')`
-        <g transform=${`translate(${x} 0)`} class=${style.step}>
-            <line x1=${0} y1=${0} x2=${0} y2=${height}/>
-            <text text-anchor="middle" x=${bucketWidth / 2} y=${-borderRadius - 10}>${title}</text>
-            <line x1=${bucketWidth} y1=${0} x2=${bucketWidth} y2=${height}/>
+    return (
+        <g transform={`translate(${x} 0)`} class={style.step}>
+            <line x1={0} y1={0} x2={0} y2={height} />
+            <text text-anchor="middle" x={bucketWidth / 2} y={-borderRadius - 10}>
+                {title}
+            </text>
+            <line x1={bucketWidth} y1={0} x2={bucketWidth} y2={height} />
         </g>
-    `;
+    );
+};
+
+const FlowGradient = ({ flow, opts }) => {
+    const { bucketWidth } = opts;
+    const id = `funnel-gradient-${flow.id}`;
+    const { from, to } = flow;
+    return (
+        <linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" x2={bucketWidth} y1="0" y2="0">
+            <stop class="funnel-gradient-start" stop-color={from.color} offset="0%" />
+            <stop class="funnel-gradient-stop" stop-color={to.color} offset="100%" />
+        </linearGradient>
+    );
 };
 
 const layoutBuckets = (funnel, opts) => {
@@ -128,13 +233,10 @@ const layoutBuckets = (funnel, opts) => {
             return [
                 ...acc,
                 {
+                    ...bucket,
                     x,
                     y,
-                    color: bucket.color,
-                    height: bucket.value * yScale,
-                    id: bucket.id,
-                    value: bucket.value,
-                    title: bucket.title
+                    height: bucket.value * yScale
                 }
             ];
         }, []);
@@ -214,225 +316,158 @@ const layoutSteps = (funnel, opts) => {
     }, []);
 };
 
-const measureContainer = container => {
-    const wrapper = html`<div class=${style.wrapper}></div>`;
-    html(container)`${wrapper}`;
-    return wrapper.getBoundingClientRect();
-};
+class Funnel extends Component {
+    constructor() {
+        super();
+        this.wrapper = undefined;
+    }
 
-const flowGradient = (flow, opts) => {
-    const { bucketWidth } = opts;
-    const id = `funnel-gradient-${flow.id}`;
-    const { from, to } = flow;
-    return html(flow, 'svg')`
-        <linearGradient id=${id} gradientUnits="userSpaceOnUse" x1="0" x2=${bucketWidth} y1="0" y2="0">
-            <stop class="funnel-gradient-start" stop-color=${from.color} offset="0%"/>
-            <stop class="funnel-gradient-stop" stop-color=${to.color} offset="100%"/>
-        </linearGradient>
-    `;
-};
+    measureWrapper(el) {
+        this.wrapper = el;
+    }
 
-export default ({ container, funnel = f }) => {
-    const stepCount = funnel.length;
-    const { width: containerWidth, height: containerHeight } = measureContainer(container);
-    const bucketWidth = containerWidth / (2 * stepCount - 1);
+    componentDidMount() {
+        const { width, height } = this.wrapper.getBoundingClientRect();
+        this.setState({
+            width,
+            height
+        });
+    }
+
+    render() {
+        const { funnel, headerHeight, borderRadius, bucketMargin } = this.props;
+        const stepCount = funnel.length;
+        const bucketWidth = this.state.width / (2 * stepCount - 1);
+
+        const width = this.state.width;
+        const height = this.state.height - headerHeight;
+
+        const maxStepValueSum = funnel.reduce((max, step) => {
+            const stepValueSum = step.buckets.reduce((sum, b) => sum + (b.value || 0), 0);
+            return stepValueSum > max ? stepValueSum : max;
+        }, 0);
+
+        const yScale = (height - headerHeight) / maxStepValueSum;
+
+        const opts = { headerHeight, borderRadius, bucketMargin, width, height, yScale, bucketWidth };
+
+        const steps = layoutSteps(funnel, opts);
+        const buckets = layoutBuckets(funnel, opts);
+        const flows = layoutFlows(funnel, buckets, opts);
+        const drops = layoutDrops(funnel, buckets, opts);
+
+        return (
+            <div class={style.wrapper} ref={el => this.measureWrapper(el)}>
+                {width > 0 ? (
+                    <svg class={style.svg}>
+                        <defs>
+                            {flows.map(f => (
+                                <FlowGradient flow={f} opts={opts} />
+                            ))}
+                            <linearGradient
+                                id="funnel-gradient-drop"
+                                class="funnel-gradient-drop"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                            >
+                                <stop class="funnel-gradient-start" offset="0%" />
+                                <stop class="funnel-gradient-stop" offset="100%" />
+                            </linearGradient>
+                            <g id="arrows">
+                                <g>
+                                    <path
+                                        d="M 0 -4 L 4 0 L 0 4"
+                                        fill="none"
+                                        stroke="white"
+                                        stroke-width="1"
+                                        opacity=".3"
+                                    />
+                                </g>
+                                <g transform="translate(10, 10)">
+                                    <path
+                                        d="M 0 -4 L 4 0 L 0 4"
+                                        fill="none"
+                                        stroke="white"
+                                        stroke-width="1"
+                                        opacity=".3"
+                                    />
+                                </g>
+                                <g transform="translate(0, 20)">
+                                    <path
+                                        d="M 0 -4 L 4 0 L 0 4"
+                                        fill="none"
+                                        stroke="white"
+                                        stroke-width="1"
+                                        opacity=".3"
+                                    />
+                                </g>
+                            </g>
+                            <pattern id="flow-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <animateTransform
+                                    attributeType="xml"
+                                    attributeName="patternTransform"
+                                    type="translate"
+                                    from="0 0"
+                                    to="20 0"
+                                    begin="0"
+                                    dur="1s"
+                                    repeatCount="indefinite"
+                                />
+                                <use href="#arrows" />
+                            </pattern>
+                            <pattern id="drop-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <animateTransform
+                                    attributeType="xml"
+                                    attributeName="patternTransform"
+                                    type="translate"
+                                    from="0 0"
+                                    to="0 20"
+                                    begin="0"
+                                    dur="1s"
+                                    repeatCount="indefinite"
+                                />
+                                <use href="#arrows" transform="rotate(90, 10, 10)" />
+                            </pattern>
+                        </defs>
+                        <g transform={`translate(0, ${headerHeight})`}>
+                            {buckets.map(b => (
+                                <Bucket bucket={b} opts={opts} />
+                            ))}
+                        </g>
+                        <g transform={`translate(0, ${headerHeight})`}>
+                            {steps.map(s => (
+                                <Step step={s} opts={opts} />
+                            ))}
+                        </g>
+                        <g transform={`translate(0, ${headerHeight})`}>
+                            {drops.map(d => (
+                                <Drop drop={d} opts={opts} />
+                            ))}
+                        </g>
+                        <g transform={`translate(0, ${headerHeight})`}>
+                            {flows.map(f => (
+                                <Flow flow={f} opts={opts} />
+                            ))}
+                        </g>
+                    </svg>
+                ) : null}
+            </div>
+        );
+    }
+}
+
+export default ({ container, funnel }) => {
     const borderRadius = 10;
     const bucketMargin = 40;
     const headerHeight = 30 + borderRadius;
-    const width = containerWidth;
-    const height = containerHeight - headerHeight;
-
-    const maxStepValueSum = funnel.reduce((max, step) => {
-        const stepValueSum = step.buckets.reduce((sum, b) => sum + b.value + ((b.drop && b.drop.value) || 0), 0);
-        return stepValueSum > max ? stepValueSum : max;
-    }, 0);
-
-    const yScale = (height - headerHeight) / maxStepValueSum;
 
     const opts = {
-        bucketWidth,
         borderRadius,
-        width,
         headerHeight,
-        height,
-        yScale,
         bucketMargin
     };
 
-    console.log(opts);
-
-    const steps = layoutSteps(funnel, opts);
-    const buckets = layoutBuckets(funnel, opts);
-    const flows = layoutFlows(funnel, buckets, opts);
-    const drops = layoutDrops(funnel, buckets, opts);
-
-    html(container)`
-        <div class=${style.wrapper}>
-            <svg class=${style.svg}>
-            <defs>
-                ${flows.map(f => flowGradient(f, opts))}
-                <linearGradient id="funnel-gradient-drop" class="funnel-gradient-drop" x1="0" y1="0" x2="0" y2="1">
-                    <stop class="funnel-gradient-start" offset="0%"/>
-                    <stop class="funnel-gradient-stop" offset="100%"/>
-                </linearGradient>
-                <g id="arrows">
-                    <g>
-                        <path d="M 0 -4 L 4 0 L 0 4" fill="none" stroke="white" stroke-width="1" opacity=".3" />
-                    </g>
-                    <g transform="translate(10, 10)">
-                        <path d="M 0 -4 L 4 0 L 0 4" fill="none" stroke="white" stroke-width="1" opacity=".3" />
-                    </g>
-                    <g transform="translate(0, 20)">
-                        <path d="M 0 -4 L 4 0 L 0 4" fill="none" stroke="white" stroke-width="1" opacity=".3" />
-                    </g>
-                </g>
-                <pattern id="flow-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"> 
-                    <animateTransform attributeType="xml"
-                            attributeName="patternTransform"
-                            type="translate" from="0 0" to="20 0" begin="0"
-                            dur="1s" repeatCount="indefinite"/>
-                    <use xlink:href="#arrows" />
-                </pattern>
-                <pattern id="drop-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" > 
-                    <animateTransform attributeType="xml"
-                            attributeName="patternTransform"
-                            type="translate" from="0 0" to="0 20" begin="0"
-                            dur="1s" repeatCount="indefinite"/>
-                    <use xlink:href="#arrows" transform="rotate(90, 10, 10)" />
-                </pattern>
-            </defs>
-                <g transform="${`translate(0, ${headerHeight})`}">
-                    ${buckets.map(b => bucket(b, opts))}
-                </g>
-                <g transform="${`translate(0, ${headerHeight})`}">
-                    ${steps.map(s => step(s, opts))}
-                </g>
-                <g transform="${`translate(0, ${headerHeight})`}">
-                    ${drops.map(d => drop(d, opts))}
-                </g>
-                <g transform="${`translate(0, ${headerHeight})`}">
-                    ${flows.map(f =>
-                        flow(
-                            f,
-                            opts
-                        )
-                    )}
-                </g> 
-                
-            </svg>
-        </div>
-    `;
+    render(<Funnel funnel={funnel} {...opts} />, container, container.querySelector(`.${style.wrapper}`));
 };
-
-const f = [
-    {
-        title: 'Acquisition',
-        buckets: [
-            {
-                id: 'evaluator',
-                title: 'Evaluator',
-                value: 100,
-                color: '#6554c0',
-                drop: {
-                    title: 'Never installed',
-                    value: 20
-                }
-            }
-        ]
-    },
-    {
-        title: 'Activation',
-        buckets: [
-            {
-                id: 'installed',
-                title: 'Installed',
-                value: 70,
-                color: '#00b8d9',
-                flows: [
-                    {
-                        source: 'evaluator',
-                        value: 70
-                    }
-                ],
-                drop: {
-                    title: 'Never used',
-                    value: 10
-                }
-            },
-            {
-                id: 'silent',
-                title: 'Silent',
-                value: 10,
-                color: '#C1C7D0',
-                flows: [
-                    {
-                        source: 'evaluator',
-                        value: 10
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        title: 'Retention',
-        buckets: [
-            {
-                id: 'active',
-                title: 'Active',
-                value: 20,
-                color: '#0052cc',
-                flows: [
-                    {
-                        source: 'installed',
-                        value: 20
-                    }
-                ],
-                drop: {
-                    title: 'Eval ended',
-                    value: 10
-                }
-            },
-            {
-                id: 'dormant',
-                title: 'Dormant',
-                value: 40,
-                color: '#C1C7D0',
-                flows: [
-                    {
-                        source: 'installed',
-                        value: 40
-                    }
-                ],
-                drop: {
-                    title: 'Eval ended',
-                    value: 35
-                }
-            }
-        ]
-    },
-    {
-        title: 'Revenue',
-        buckets: [
-            {
-                title: 'Converted',
-                value: 8,
-                id: 'converted',
-                color: '#36b37e',
-                flows: [
-                    {
-                        source: 'active',
-                        value: 5
-                    },
-                    {
-                        source: 'dormant',
-                        value: 2
-                    },
-                    {
-                        source: 'silent',
-                        value: 1
-                    }
-                ]
-            }
-        ]
-    }
-];
