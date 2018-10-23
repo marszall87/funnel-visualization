@@ -1,6 +1,6 @@
 {
     "name": "funnel-visualization",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "",
     "main": "dist/funnel-visualization.js",
     "module": "dist/funnel-visualization.esm.js",
