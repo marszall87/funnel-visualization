@@ -78,6 +78,7 @@ class Bucket extends Component {
                         <h4>{title} clients</h4>
                         {clients.map(client => (
                             <p>
+                                <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
                                 <a href={client.link}>{client.name}</a>
                             </p>
                         ))}
@@ -105,7 +106,7 @@ const Flow = ({ flow, opts }) => {
 
     const gradientUrl = `url(#funnel-gradient-${id})`;
 
-    const fontSize = percent < 0.3 ? Math.max(percent * 50 + 7, 12) : 22;
+    const fontSize = height < 22 ? Math.max(height, 12) : 22;
     const labelRadius = 5;
 
     if (straight) {
@@ -186,7 +187,7 @@ const Drop = ({ drop, opts }) => {
     return (
         <g transform={`translate(${x} ${y})`} class={style.drop}>
             <path fill="none" d={path} stroke-width={radius * 2} />
-            <rect class={style.solid} x={0} y={radius} width={radius * 2} height={height - radius} />
+            <rect class={style.solid} x={0} y={radius} width={radius * 2} height={Math.max(height - radius, 0)} />
             <rect x={0} y={height} width={radius * 2} height={padding} fill="url(#funnel-gradient-drop)" />
             <rect x={0} y={-radius} width={radius * 2} height={height + padding + radius} fill="url(#drop-pattern)" />
             <text x={3} y={radius}>
@@ -202,7 +203,7 @@ const Step = ({ step, opts }) => {
     return (
         <g transform={`translate(${x} 0)`} class={style.step}>
             <line x1={0} y1={0} x2={0} y2={height} />
-            <text text-anchor="middle" x={bucketWidth / 2} y={-borderRadius - 10}>
+            <text text-anchor="middle" x={bucketWidth / 2} y={-borderRadius - 20}>
                 {title}
             </text>
             <line x1={bucketWidth} y1={0} x2={bucketWidth} y2={height} />
@@ -228,6 +229,7 @@ const layoutBuckets = (funnel, opts) => {
     return funnel.reduce((acc, step, stepIdx) => {
         const bucketCount = step.buckets.length;
         const stepBuckets = step.buckets.reduce((acc, bucket, bucketIdx) => {
+            if (bucket.value === 0) return acc;
             const x = 2 * stepIdx * bucketWidth;
             const y = acc.reduce((sum, b) => sum + b.height + bucketMargin, 0);
             return [
@@ -255,6 +257,7 @@ const layoutFlows = (funnel, buckets, opts) => {
                 return [
                     ...acc,
                     ...bucket.flows.reduce((acc, flow) => {
+                        if (flow.value === 0) return acc;
                         const from = buckets.find(b => b.id === flow.source);
                         const height = flow.value * yScale;
                         const fromOffset = from.fromOffset || 0;
@@ -286,7 +289,7 @@ const layoutDrops = (funnel, buckets, opts) => {
 
     return funnel.reduce((acc, step) => {
         const stepDrops = step.buckets.reduce((acc, bucket) => {
-            if (!bucket.drop) return acc;
+            if (!bucket.drop || bucket.drop.value === 0) return acc;
             const from = buckets.find(b => b.id === bucket.id);
             return [
                 ...acc,
@@ -366,14 +369,14 @@ class Funnel extends Component {
                             ))}
                             <linearGradient
                                 id="funnel-gradient-drop"
-                                class="funnel-gradient-drop"
+                                class="funnel-visualization-gradient-drop"
                                 x1="0"
                                 y1="0"
                                 x2="0"
                                 y2="1"
                             >
-                                <stop class="funnel-gradient-start" offset="0%" />
-                                <stop class="funnel-gradient-stop" offset="100%" />
+                                <stop class="funnel-visualization-gradient-start" offset="0%" />
+                                <stop class="funnel-visualization-gradient-stop" offset="100%" />
                             </linearGradient>
                             <g id="arrows">
                                 <g>
@@ -433,7 +436,7 @@ class Funnel extends Component {
                         </defs>
                         <g transform={`translate(0, ${headerHeight})`}>
                             {buckets.map(b => (
-                                <Bucket bucket={b} opts={opts} />
+                                <Bucket key={b.id} bucket={b} opts={opts} />
                             ))}
                         </g>
                         <g transform={`translate(0, ${headerHeight})`}>
@@ -448,7 +451,7 @@ class Funnel extends Component {
                         </g>
                         <g transform={`translate(0, ${headerHeight})`}>
                             {flows.map(f => (
-                                <Flow flow={f} opts={opts} />
+                                <Flow key={f.id} flow={f} opts={opts} />
                             ))}
                         </g>
                     </svg>
@@ -459,9 +462,9 @@ class Funnel extends Component {
 }
 
 export default ({ container, funnel }) => {
-    const borderRadius = 10;
+    const borderRadius = 0;
     const bucketMargin = 40;
-    const headerHeight = 30 + borderRadius;
+    const headerHeight = 40 + borderRadius;
 
     const opts = {
         borderRadius,
