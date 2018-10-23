@@ -15,7 +15,7 @@
         }
 
         #container {
-            /* padding: 2em; */
+            padding: 2em;
             height: 500px;
             box-sizing: border-box;
         }
@@ -65,18 +65,18 @@
                             value: 10
                         }
                     },
-                    // {
-                    //     id: 'silent',
-                    //     title: 'Silent',
-                    //     value: 10,
-                    //     color: '#C1C7D0',
-                    //     flows: [
-                    //         {
-                    //             source: 'evaluator',
-                    //             value: 10
-                    //         }
-                    //     ]
-                    // }
+                    {
+                        id: 'silent',
+                        title: 'Silent',
+                        value: 10,
+                        color: '#C1C7D0',
+                        flows: [
+                            {
+                                source: 'evaluator',
+                                value: 10
+                            }
+                        ]
+                    }
                 ]
             },
             {
@@ -139,10 +139,10 @@
                                 source: 'dormant',
                                 value: 2
                             },
-                            // {
-                            //     source: 'silent',
-                            //     value: 1
-                            // }
+                            {
+                                source: 'silent',
+                                value: 1
+                            }
                         ]
                     }
                 ]
