@@ -129,7 +129,7 @@ const Flow = ({ flow, opts }) => {
                     y={height / 2 + 1}
                     alignment-baseline="middle"
                     text-anchor="middle"
-                    font-size={`${fontSize}px`}
+                    font-size={`${fontSize / 22}em`}
                 >
                     {Math.floor(percent * 100)}%
                 </text>
@@ -163,7 +163,7 @@ const Flow = ({ flow, opts }) => {
                     transform={`translate(0 ${textY})`}
                     alignment-baseline="middle"
                     text-anchor="middle"
-                    font-size={`${fontSize}px`}
+                    font-size={`${fontSize / 22}em`}
                 >
                     {Math.floor(percent * 100)}%
                 </text>
