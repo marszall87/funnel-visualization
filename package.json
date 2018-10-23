@@ -2,9 +2,9 @@
     "name": "funnel-visualization",
     "version": "1.0.0",
     "description": "",
-    "main": "dist/funnel.js",
-    "module": "dist/funnel.esm.js",
-    "browser": "dist/funnel.umd.js",
+    "main": "dist/funnel-visualization.js",
+    "module": "dist/funnel-visualization.esm.js",
+    "browser": "dist/funnel-visualization.umd.js",
     "scripts": {
         "build": "rollup -c --environment BUILD:production",
         "watch": "rollup -c --watch",
