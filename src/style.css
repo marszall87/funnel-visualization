@@ -32,6 +32,14 @@
     }
 }
 
+.popup-trigger {
+    cursor: pointer;
+    user-select: none;
+    &:hover {
+        opacity: 0.7;
+    }
+}
+
 .flow {
     opacity: 0.7;
     transition: all 0.5s;
