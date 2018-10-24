@@ -43,7 +43,7 @@ class WithPopup extends Component {
 class Bucket extends WithPopup {
     render({ bucket, opts }) {
         const { id, color, x, y, title, value, height, clients } = bucket;
-        const { bucketWidth, borderRadius } = opts;
+        const { bucketWidth, borderRadius, interactive } = opts;
         return (
             <g
                 ref={el => (this.triggerElement = el)}
@@ -75,15 +75,17 @@ class Bucket extends WithPopup {
                         {value}
                     </text>
                 </g>
-                <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
-                    <h4>{title}</h4>
-                    {clients.map(client => (
-                        <p>
-                            <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
-                            <a href={client.link}>{client.name}</a>
-                        </p>
-                    ))}
-                </Popup>
+                {interactive ? (
+                    <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
+                        <h4>{title}</h4>
+                        {clients.map(client => (
+                            <p>
+                                <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
+                                <a href={client.link}>{client.name}</a>
+                            </p>
+                        ))}
+                    </Popup>
+                ) : null}
             </g>
         );
     }
@@ -92,7 +94,7 @@ class Bucket extends WithPopup {
 class Flow extends WithPopup {
     render({ flow, opts }) {
         const { from, to, height, fromOffset, toOffset, id, percent, clients, title } = flow;
-        const { bucketWidth, height: graphHeight } = opts;
+        const { bucketWidth, height: graphHeight, interactive } = opts;
 
         const x1 = from.x + bucketWidth;
         const x2 = to.x;
@@ -138,14 +140,16 @@ class Flow extends WithPopup {
                             {Math.floor(percent * 100)}%
                         </text>
                     </g>
-                    <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
-                        {clients.map(client => (
-                            <p>
-                                <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
-                                <a href={client.link}>{client.name}</a>
-                            </p>
-                        ))}
-                    </Popup>
+                    {interactive ? (
+                        <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
+                            {clients.map(client => (
+                                <p>
+                                    <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
+                                    <a href={client.link}>{client.name}</a>
+                                </p>
+                            ))}
+                        </Popup>
+                    ) : null}
                 </g>
             );
         } else {
@@ -186,14 +190,16 @@ class Flow extends WithPopup {
                             {Math.floor(percent * 100)}%
                         </text>
                     </g>
-                    <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
-                        {clients.map(client => (
-                            <p>
-                                <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
-                                <a href={client.link}>{client.name}</a>
-                            </p>
-                        ))}
-                    </Popup>
+                    {interactive ? (
+                        <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
+                            {clients.map(client => (
+                                <p>
+                                    <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
+                                    <a href={client.link}>{client.name}</a>
+                                </p>
+                            ))}
+                        </Popup>
+                    ) : null}
                 </g>
             );
         }
@@ -203,7 +209,7 @@ class Flow extends WithPopup {
 class Drop extends WithPopup {
     render({ drop, opts }) {
         const { from, height, title, percent, clients } = drop;
-        const { bucketWidth } = opts;
+        const { bucketWidth, interactive } = opts;
 
         const radius = 15;
         const padding = 10;
@@ -234,14 +240,16 @@ class Drop extends WithPopup {
                         {Math.floor(percent * 100)}%
                     </text>
                 </g>
-                <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
-                    {clients.map(client => (
-                        <p>
-                            <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
-                            <a href={client.link}>{client.name}</a>
-                        </p>
-                    ))}
-                </Popup>
+                {interactive ? (
+                    <Popup open={this.state.showPopup} triggerRef={this.triggerElement}>
+                        {clients.map(client => (
+                            <p>
+                                <span class={`${style.label} ${style.label}-${client.label}`}>{client.label}</span>{' '}
+                                <a href={client.link}>{client.name}</a>
+                            </p>
+                        ))}
+                    </Popup>
+                ) : null}
             </g>
         );
     }
@@ -399,7 +407,7 @@ class Funnel extends Component {
     }
 
     render() {
-        const { funnel, headerHeight, borderRadius, bucketMargin } = this.props;
+        const { funnel, headerHeight, borderRadius, bucketMargin, animate, interactive } = this.props;
         const stepCount = funnel.length;
         const bucketWidth = this.state.width / (2 * stepCount - 1);
 
@@ -413,7 +421,7 @@ class Funnel extends Component {
 
         const yScale = (height - headerHeight) / maxStepValueSum;
 
-        const opts = { headerHeight, borderRadius, bucketMargin, width, height, yScale, bucketWidth };
+        const opts = { headerHeight, borderRadius, bucketMargin, width, height, yScale, bucketWidth, interactive };
 
         const steps = layoutSteps(funnel, opts);
         const buckets = layoutBuckets(funnel, opts);
@@ -469,29 +477,33 @@ class Funnel extends Component {
                                 </g>
                             </g>
                             <pattern id="flow-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                                <animateTransform
-                                    attributeType="xml"
-                                    attributeName="patternTransform"
-                                    type="translate"
-                                    from="0 0"
-                                    to="20 0"
-                                    begin="0"
-                                    dur="1s"
-                                    repeatCount="indefinite"
-                                />
+                                {animate ? (
+                                    <animateTransform
+                                        attributeType="xml"
+                                        attributeName="patternTransform"
+                                        type="translate"
+                                        from="0 0"
+                                        to="20 0"
+                                        begin="0"
+                                        dur="1s"
+                                        repeatCount="indefinite"
+                                    />
+                                ) : null}
                                 <use href="#arrows" />
                             </pattern>
                             <pattern id="drop-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                                <animateTransform
-                                    attributeType="xml"
-                                    attributeName="patternTransform"
-                                    type="translate"
-                                    from="0 0"
-                                    to="0 20"
-                                    begin="0"
-                                    dur="1s"
-                                    repeatCount="indefinite"
-                                />
+                                {animate ? (
+                                    <animateTransform
+                                        attributeType="xml"
+                                        attributeName="patternTransform"
+                                        type="translate"
+                                        from="0 0"
+                                        to="0 20"
+                                        begin="0"
+                                        dur="1s"
+                                        repeatCount="indefinite"
+                                    />
+                                ) : null}
                                 <use href="#arrows" transform="rotate(90, 10, 10)" />
                             </pattern>
                         </defs>
@@ -522,15 +534,16 @@ class Funnel extends Component {
     }
 }
 
-export default ({ container, funnel }) => {
-    const borderRadius = 0;
-    const bucketMargin = 40;
+export default ({ container, funnel, options }) => {
+    const { borderRadius = 0, bucketMargin = 40, animate = true, interactive = true } = options;
     const headerHeight = 40 + borderRadius;
 
     const opts = {
         borderRadius,
         headerHeight,
-        bucketMargin
+        bucketMargin,
+        interactive,
+        animate
     };
 
     render(<Funnel funnel={funnel} {...opts} />, container, container.querySelector(`.${style.wrapper}`));
