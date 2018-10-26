@@ -29,6 +29,7 @@
     <script src="../dist/funnel-visualization.umd.js" type="text/javascript"></script>
 
     <script>
+        const generateClients = count => Array.from({ length: count }, (_, idx) => ({ name: `Client ${idx}`, link: `#client-${idx}` }));
 
         const funnel = [
             {
@@ -37,12 +38,8 @@
                     {
                         id: 'evaluator',
                         title: 'Evaluator',
-                        value: 100,
-                        color: '#6554c0',
-                        drop: {
-                            title: 'Never installed',
-                            value: 20
-                        }
+                        clients: generateClients(100),
+                        color: '#6554c0'
                     }
                 ]
             },
@@ -52,28 +49,28 @@
                     {
                         id: 'installed',
                         title: 'Installed',
-                        value: 70,
+                        clients: generateClients(70),
                         color: '#00b8d9',
                         flows: [
                             {
                                 source: 'evaluator',
-                                value: 70
+                                clients: generateClients(70)
                             }
                         ],
                         drop: {
                             title: 'Never used',
-                            value: 10
+                            clients: generateClients(10)
                         }
                     },
                     {
                         id: 'silent',
                         title: 'Silent',
-                        value: 10,
+                        clients: generateClients(10),
                         color: '#C1C7D0',
                         flows: [
                             {
                                 source: 'evaluator',
-                                value: 10
+                                clients: generateClients(10)
                             }
                         ]
                     }
@@ -85,39 +82,33 @@
                     {
                         id: 'active',
                         title: 'Active',
-                        value: 20,
+                        clients: generateClients(20),
                         color: '#0052cc',
                         flows: [
                             {
                                 source: 'installed',
-                                value: 20
+                                clients: generateClients(20)
                             }
                         ],
                         drop: {
                             title: 'Eval ended',
-                            value: 10
-                        },
-                        clients: [
-                            {
-                                name: 'Some company',
-                                link: 'https://www.google.pl'
-                            }
-                        ]
+                            clients: generateClients(1)
+                        }
                     },
                     {
                         id: 'dormant',
                         title: 'Dormant',
-                        value: 40,
+                        clients: generateClients(40),
                         color: '#C1C7D0',
                         flows: [
                             {
                                 source: 'installed',
-                                value: 40
+                                clients: generateClients(40)
                             }
                         ],
                         drop: {
                             title: 'Eval ended',
-                            value: 35
+                            clients: generateClients(35)
                         }
                     }
                 ]
@@ -127,21 +118,21 @@
                 buckets: [
                     {
                         title: 'Converted',
-                        value: 8,
+                        clients: generateClients(8),
                         id: 'converted',
                         color: '#36b37e',
                         flows: [
                             {
                                 source: 'active',
-                                value: 5
+                                clients: generateClients(5)
                             },
                             {
                                 source: 'dormant',
-                                value: 2
+                                clients: generateClients(2)
                             },
                             {
                                 source: 'silent',
-                                value: 1
+                                clients: generateClients(1)
                             }
                         ]
                     }

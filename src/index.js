@@ -211,7 +211,7 @@ class Drop extends WithPopup {
         const { from, height, title, percent, clients } = drop;
         const { bucketWidth, interactive } = opts;
 
-        const radius = 15;
+        const radius = Math.min(15, Math.floor(percent * 100));
         const padding = 10;
 
         const x = from.x + bucketWidth;
@@ -223,7 +223,13 @@ class Drop extends WithPopup {
             <g transform={`translate(${x} ${y})`} class={style.drop}>
                 <path fill="none" d={path} stroke-width={radius * 2} />
                 <rect class={style.solid} x={0} y={radius} width={radius * 2} height={Math.max(height - radius, 0)} />
-                <rect x={0} y={height} width={radius * 2} height={padding} fill="url(#funnel-gradient-drop)" />
+                <rect
+                    x={0}
+                    y={Math.max(height, radius)}
+                    width={radius * 2}
+                    height={padding}
+                    fill="url(#funnel-gradient-drop)"
+                />
                 <rect
                     x={0}
                     y={-radius}
@@ -236,7 +242,7 @@ class Drop extends WithPopup {
                     onClick={() => this.togglePopup()}
                     ref={el => (this.triggerElement = el)}
                 >
-                    <text x={3} y={radius}>
+                    <text x={radius * 2 + 5} y={radius}>
                         {Math.floor(percent * 100)}%
                     </text>
                 </g>
@@ -450,29 +456,29 @@ class Funnel extends Component {
                             <g id="arrows">
                                 <g>
                                     <path
-                                        d="M 0 -4 L 4 0 L 0 4"
+                                        d="M 0 0 L 4 4 L 0 8"
                                         fill="none"
                                         stroke="white"
                                         stroke-width="1"
-                                        opacity=".3"
+                                        opacity="1"
                                     />
                                 </g>
                                 <g transform="translate(10, 10)">
                                     <path
-                                        d="M 0 -4 L 4 0 L 0 4"
+                                        d="M 0 0 L 4 4 L 0 8"
                                         fill="none"
                                         stroke="white"
                                         stroke-width="1"
-                                        opacity=".3"
+                                        opacity="1"
                                     />
                                 </g>
                                 <g transform="translate(0, 20)">
                                     <path
-                                        d="M 0 -4 L 4 0 L 0 4"
+                                        d="M 0 0 L 4 4 L 0 8"
                                         fill="none"
                                         stroke="white"
                                         stroke-width="1"
-                                        opacity=".3"
+                                        opacity="1"
                                     />
                                 </g>
                             </g>
@@ -534,7 +540,7 @@ class Funnel extends Component {
     }
 }
 
-export default ({ container, funnel, options }) => {
+export default ({ container, funnel, options = {} }) => {
     const { borderRadius = 0, bucketMargin = 40, animate = true, interactive = true } = options;
     const headerHeight = 40 + borderRadius;
 
