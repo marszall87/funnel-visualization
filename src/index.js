@@ -425,7 +425,7 @@ class Funnel extends Component {
             const stepValueSum = step.buckets.reduce(
                 (sum, bucket) => sum + ((bucket.value || bucket.clients && bucket.clients.length) || 0), 0
             ) * (step.scale || 1);
-            const margins = (step.buckets.length - 1) * bucketMargin;
+            const margins = step.buckets.length * bucketMargin;
             const scale = Math.floor((height - margins) / stepValueSum * 100) / 100;
             return scale < min ? scale : min;
         }, Number.POSITIVE_INFINITY) : 1;
