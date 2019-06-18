@@ -293,7 +293,7 @@ const layoutBuckets = (funnel, opts) => {
     return funnel.reduce((acc, step, stepIdx) => {
         const bucketCount = step.buckets.length;
         const stepBuckets = step.buckets.reduce((acc, bucket, bucketIdx) => {
-            const value = bucket.clients && bucket.clients.length;
+            const value = bucket.value || bucket.clients && bucket.clients.length;
             if (value === 0) return acc;
             const x = 2 * stepIdx * bucketWidth;
             const y = acc.reduce((sum, b) => sum + b.height + bucketMargin, 0);
@@ -323,10 +323,10 @@ const layoutFlows = (funnel, buckets, opts) => {
                 return [
                     ...acc,
                     ...bucket.flows.reduce((acc, flow) => {
-                        const value = flow.clients && flow.clients.length;
+                        const value = flow.value || flow.clients && flow.clients.length;
                         if (value === 0) return acc;
                         const from = buckets.find(b => b.id === flow.source);
-                        const fromValue = from.clients && from.clients.length;
+                        const fromValue = from.value || from.clients && from.clients.length;
                         const height = value * yScale;
                         const fromOffset = from.fromOffset || 0;
                         const toOffset = to.toOffset || 0;
@@ -361,9 +361,9 @@ const layoutDrops = (funnel, buckets, opts) => {
         const stepDrops = step.buckets.reduce((acc, bucket) => {
             if (!bucket.drop) return acc;
             const from = buckets.find(b => b.id === bucket.id);
-            const value = bucket.drop.clients && bucket.drop.clients.length;
+            const value = bucket.drop.value || bucket.drop.clients && bucket.drop.clients.length;
             if (!value) return acc;
-            const bucketValue = bucket.clients && bucket.clients.length;
+            const bucketValue = bucket.value || bucket.clients && bucket.clients.length;
             return [
                 ...acc,
                 {
@@ -420,12 +420,14 @@ class Funnel extends Component {
         const width = this.state.width;
         const height = this.state.height - headerHeight;
 
-        const maxStepValueSum = funnel.reduce((max, step) => {
-            const stepValueSum = step.buckets.reduce((sum, b) => sum + ((b.clients && b.clients.length) || 0), 0);
-            return stepValueSum > max ? stepValueSum : max;
-        }, 0);
-
-        const yScale = (height - headerHeight) / maxStepValueSum;
+        const yScale = funnel.reduce((min, step) => {
+            const stepValueSum = step.buckets.reduce(
+                (sum, bucket) => sum + ((bucket.entities && bucket.entities.length) || 0), 0
+            );
+            const margins = (step.buckets.length - 1) * bucketMargin;
+            const yScale = Math.round((containerHeight - margins) / stepValueSum * 10) / 10;
+            return yScale < min ? yScale : min;
+        }, Number.POSITIVE_INFINITY);
 
         const opts = { headerHeight, borderRadius, bucketMargin, width, height, yScale, bucketWidth, interactive };
 
