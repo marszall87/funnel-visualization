@@ -292,6 +292,7 @@ const layoutBuckets = (funnel, opts) => {
 
     return funnel.reduce((acc, step, stepIdx) => {
         const bucketCount = step.buckets.length;
+        const stepScale = step.scale || 1;
         const stepBuckets = step.buckets.reduce((acc, bucket, bucketIdx) => {
             const value = bucket.value || bucket.clients && bucket.clients.length;
             if (value === 0) return acc;
@@ -303,7 +304,7 @@ const layoutBuckets = (funnel, opts) => {
                     ...bucket,
                     x,
                     y,
-                    height: value * yScale,
+                    height: value * yScale * stepScale,
                     value
                 }
             ];
@@ -420,14 +421,15 @@ class Funnel extends Component {
         const width = this.state.width;
         const height = this.state.height - headerHeight;
 
-        const yScale = funnel.reduce((min, step) => {
+        const yScale = height ? funnel.reduce((min, step) => {
             const stepValueSum = step.buckets.reduce(
-                (sum, bucket) => sum + ((bucket.entities && bucket.entities.length) || 0), 0
-            );
+                (sum, bucket) => sum + ((bucket.value || bucket.clients && bucket.clients.length) || 0), 0
+            ) * (step.scale || 1);
             const margins = (step.buckets.length - 1) * bucketMargin;
-            const yScale = Math.round((containerHeight - margins) / stepValueSum * 10) / 10;
-            return yScale < min ? yScale : min;
-        }, Number.POSITIVE_INFINITY);
+            const scale = Math.floor((height - margins) / stepValueSum * 100) / 100;
+            return scale < min ? scale : min;
+        }, Number.POSITIVE_INFINITY) : 1;
+        console.log(yScale);
 
         const opts = { headerHeight, borderRadius, bucketMargin, width, height, yScale, bucketWidth, interactive };
 
