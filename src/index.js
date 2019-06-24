@@ -93,7 +93,7 @@ class Bucket extends WithPopup {
 
 class Flow extends WithPopup {
     render({ flow, opts }) {
-        const { from, to, height, fromOffset, toOffset, id, percent, clients, title } = flow;
+        const { from, to, height, fromOffset, toOffset, id, percent, clients, title, value } = flow;
         const { bucketWidth, height: graphHeight, interactive } = opts;
 
         const x1 = from.x + bucketWidth;
@@ -112,6 +112,8 @@ class Flow extends WithPopup {
 
         const fontSize = height < 22 ? Math.max(height, 12) : 22;
         const labelRadius = 5;
+
+        const percentDisplay = Math.floor(percent * 100);
 
         if (straight) {
             // draw a rectangle, because gradients don't work on straight lines o_O
@@ -137,7 +139,7 @@ class Flow extends WithPopup {
                             text-anchor="middle"
                             font-size={`${fontSize / 22}em`}
                         >
-                            {Math.floor(percent * 100)}%
+                            {percentDisplay > 0 ? `${percentDisplay}%` : `< 1% (${value})`}
                         </text>
                     </g>
                     {interactive ? (
