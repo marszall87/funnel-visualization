@@ -189,7 +189,7 @@ class Flow extends WithPopup {
                             text-anchor="middle"
                             font-size={`${fontSize / 22}em`}
                         >
-                            {Math.floor(percent * 100)}%
+                            {percentDisplay > 0 ? `${percentDisplay}%` : `< 1% (${value})`}
                         </text>
                     </g>
                     {interactive ? (
